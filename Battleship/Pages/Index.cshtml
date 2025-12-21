@@ -1,0 +1,25 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+@if (!HttpContext.Session.GetInt32("UserId").HasValue)
+{
+    @if(Model.wrong_credentials)
+    {
+        <p style="color:red">Ihr Login ist fehlgeschlagen!</p>
+    }
+    
+    <form method="post">
+        <a>Username: </a> <input type="text" id="username" asp-for="Username"/>
+        <br />
+        <a>Password: </a>    <input type="password" id="password" asp-for="Password"/>
+        <br />
+        <input type="submit" value="Login"/>
+    </form>
+}

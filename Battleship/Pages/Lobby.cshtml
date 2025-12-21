@@ -1,0 +1,42 @@
+﻿@page
+@model Battleship.Pages.LobbyModel
+@{
+}
+@if (HttpContext.Session.GetInt32("UserId").HasValue)
+{
+    <h1>Willkommen in der Lobby</h1>
+
+
+    <h2>Spiel Hosten</h2>
+    <form method="post">
+        <input type="text" asp-for="HostGame"/>
+        <input type="submit" value="Spiel Hosten" />
+    </form>
+
+    <br>
+    <br>
+    <br>
+
+
+    <h2>Verfügbare Spiele</h2>
+    <table>
+        <tr>
+            <th>Spielname</th>
+            <th>Host</th>
+            <th>Aktion</th>
+        </tr>
+        @foreach (var game in Model.AvailableGames)
+        {
+            <tr>
+                <td>@game.MatchName</td>
+                <td>@game.HostUsername</td>
+                <td>
+                    <form method="post">
+                        <input type="hidden" asp-for="JoinMatchId" value="@game.MatchId" />
+                        <input type="submit" value="Beitreten" />
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
