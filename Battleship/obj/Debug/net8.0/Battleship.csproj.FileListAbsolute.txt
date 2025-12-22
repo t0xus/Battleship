@@ -46,3 +46,4 @@ C:\Users\t0xus\source\repos\Battleship\Battleship\obj\Debug\net8.0\refint\Battle
 C:\Users\t0xus\source\repos\Battleship\Battleship\obj\Debug\net8.0\Battleship.pdb
 C:\Users\t0xus\source\repos\Battleship\Battleship\obj\Debug\net8.0\Battleship.genruntimeconfig.cache
 C:\Users\t0xus\source\repos\Battleship\Battleship\obj\Debug\net8.0\ref\Battleship.dll
+C:\Users\t0xus\source\repos\Battleship\Battleship\obj\Debug\net8.0\Battleship.sourcelink.json

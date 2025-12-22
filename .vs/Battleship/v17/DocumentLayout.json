@@ -3,20 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\t0xus\\source\\repos\\Battleship\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\pages\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\pages\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\pages\\lobby.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\pages\\lobby.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\pages\\lobby.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\pages\\lobby.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\pages\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\pages\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\pages\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\pages\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\pages\\game.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\pages\\game.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|c:\\users\\t0xus\\source\\repos\\battleship\\battleship\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F87820F0-BD33-4003-AB80-0EBA4CAC7D72}|Battleship\\Battleship.csproj|solutionrelative:battleship\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,20 +38,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Game.cshtml",
-              "DocumentMoniker": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Game.cshtml",
-              "RelativeDocumentMoniker": "Battleship\\Pages\\Game.cshtml",
-              "ToolTip": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Game.cshtml",
-              "RelativeToolTip": "Battleship\\Pages\\Game.cshtml",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-21T13:14:31.059Z",
+              "DocumentIndex": 0,
+              "Title": "Lobby.cshtml.cs",
+              "DocumentMoniker": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Lobby.cshtml.cs",
+              "RelativeDocumentMoniker": "Battleship\\Pages\\Lobby.cshtml.cs",
+              "ToolTip": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Lobby.cshtml.cs",
+              "RelativeToolTip": "Battleship\\Pages\\Lobby.cshtml.cs",
+              "ViewState": "AQIAAPoAAAAAAAAAAAAEwBMBAAAdAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-22T15:05:55.378Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "Index.cshtml.cs",
               "DocumentMoniker": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Index.cshtml.cs",
               "RelativeDocumentMoniker": "Battleship\\Pages\\Index.cshtml.cs",
@@ -55,12 +59,11 @@
               "RelativeToolTip": "Battleship\\Pages\\Index.cshtml.cs",
               "ViewState": "AQIAADQAAAAAAAAAAAAcwBEAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-21T12:39:54.025Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-21T12:39:54.025Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Index.cshtml",
               "RelativeDocumentMoniker": "Battleship\\Pages\\Index.cshtml",
@@ -73,7 +76,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\appsettings.json",
               "RelativeDocumentMoniker": "Battleship\\appsettings.json",
@@ -81,7 +84,40 @@
               "RelativeToolTip": "Battleship\\appsettings.json",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-12-21T11:52:38.564Z",
+              "WhenOpened": "2025-12-21T11:52:38.564Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "FloatingWindowState": {
+        "Id": "8895e724-e9ef-40d1-b1c4-0ead549b2cca",
+        "Display": 0,
+        "X": 398,
+        "Y": 146,
+        "Width": 1516,
+        "Height": 980,
+        "WindowState": 0
+      },
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Lobby.cshtml",
+              "DocumentMoniker": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Lobby.cshtml",
+              "RelativeDocumentMoniker": "Battleship\\Pages\\Lobby.cshtml",
+              "ToolTip": "C:\\Users\\t0xus\\source\\repos\\Battleship\\Battleship\\Pages\\Lobby.cshtml",
+              "RelativeToolTip": "Battleship\\Pages\\Lobby.cshtml",
+              "ViewState": "AQIAAAYAAAAAAAAAAAAAAB0AAAAQAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-22T15:05:51.07Z",
               "EditorCaption": ""
             }
           ]
