@@ -74,6 +74,16 @@ namespace Battleship.Pages
                 Response.Redirect("Index");
             }
 
+            // Prüfe, ob man schon in einem Spiel ist
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var ongoing_match = _context.Matches
+                .FirstOrDefault(m => (m.IdHost == userId || m.IdParticipant == userId) && m.Done == false);
+
+            if (ongoing_match != null)
+            {
+                Response.Redirect($"Game");
+            }
+
             // Lade verfügbare Spiele
             var matches = from m in _context.Matches
                           where m.IdParticipant == null && m.Done == false

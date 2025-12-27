@@ -4,6 +4,13 @@
 }
 @if (HttpContext.Session.GetInt32("UserId").HasValue)
 {
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["Message"]
+        </div>
+    }
+
     <h1>Willkommen in der Lobby</h1>
 
 
