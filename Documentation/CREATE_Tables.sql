@@ -30,7 +30,32 @@ CREATE TABLE Battleground (
 	field_j INT
 );
 	
-	
-	
+CREATE TABLE Ships_battleground (
+	id SERIAL PRIMARY KEY,
+	id_match INT,
+	id_ship INT,
+	ship_host BOOLEAN,
+	x_cord INT,
+	y_cord INT,
+	across BOOLEAN
+);	
+
+CREATE TABLE Ship (
+	id SERIAL PRIMARY KEY,
+	boxes INT,
+	quantity INT,
+	NAME VARCHAR(255)
+);
+
+INSERT INTO ship (boxes, quantity, name) VALUES (5, 1, 'Battleship');
+INSERT INTO ship (boxes, quantity, name) VALUES (4, 2, 'Cruiser');
+INSERT INTO ship (boxes, quantity, name) VALUES (3, 3, 'Destroyer');
+INSERT INTO ship (boxes, quantity, name) VALUES (2, 4, 'Submarine');
+
+
+
+
+
+
 	
 	

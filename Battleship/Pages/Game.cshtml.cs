@@ -1,6 +1,8 @@
 using Battleship.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Battleship.Pages
 {
@@ -10,410 +12,225 @@ namespace Battleship.Pages
         private readonly ILogger<GameModel> _logger;
 
         private readonly battleshipContext _context;
+        //public GameModel(battleshipContext context) => _context = context;
 
-        public List<List<int?>> OwnMap { get; set; } = new List<List<int?>>();
-        public List<List<int?>> OpponentMap { get; set; } = new List<List<int?>>();
+        [BindProperty(SupportsGet = true)]
+        public int IdMatch { get; set; }
 
-        public Boolean myTurn = false;
+        [BindProperty(SupportsGet = true)]
+        public bool Host { get; set; }
 
-        [BindProperty]
-        public string y_cord { get; set; }
+        public string[] Columns { get; } = new[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
 
-        [BindProperty]
-        public string x_cord { get; set; }
+        // 10x10 Feld (Index 1..10)
+        private int[,] _grid = new int[11, 11];
+
+        // Für Umrandung: Zellen pro ShipId
+        private Dictionary<int, HashSet<(int x, int y)>> _shipCellsByPlacementId = new();
+
+
 
         public GameModel(ILogger<GameModel> logger, battleshipContext context)
         {
             _logger = logger;
             _context = context;
+        }
 
-            //Initialisiere eigene Map und Gegner Map mit 0
-            for (int i = 0; i < 10; i++)
+        public async Task OnGetAsync()
+        {
+            await LoadBoardAsync();
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            await LoadBoardAsync();
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostShootAsync(string shot)
+        {
+            // shot = "x,y"
+            var parts = shot.Split(',');
+            if (parts.Length != 2
+                || !int.TryParse(parts[0], out var x)
+                || !int.TryParse(parts[1], out var y)
+                || x < 1 || x > 10 || y < 1 || y > 10)
             {
-                OwnMap.Add(new List<int?>());
-                OpponentMap.Add(new List<int?>());
-                for (int j = 0; j < 10; j++)
+                await LoadBoardAsync();
+                return Page();
+            }
+
+            // Battleground-Zeile für (IdMatch, Host, y)
+            var row = await _context.Battlegrounds
+                .FirstOrDefaultAsync(b => b.IdMatch == IdMatch && b.FieldHost == Host && b.YCord == y);
+
+            if (row == null)
+            {
+                await LoadBoardAsync();
+                return Page();
+            }
+
+            // Feld-Value lesen und updaten
+            int current = GetFieldValue(row, x);
+            if (current == 2) SetFieldValue(row, x, 3);      // Treffer
+            else if (current == 0) SetFieldValue(row, x, 1); // Fehlschuss
+
+            await _context.SaveChangesAsync();
+
+            // Neu laden fürs UI
+            await LoadBoardAsync();
+            return Page();
+        }
+
+        // ---------- Public helpers for cshtml ----------
+
+        public int GetCell(int x, int y) => _grid[x, y];
+
+        public string GetCellCss(int x, int y)
+        {
+            // Grundzustand aus Battleground
+            var v = _grid[x, y];
+            var cls = v switch
+            {
+                0 => "miss",
+                1 => "hitbad",
+                2 => "ship",
+                3 => "shiphit",
+                _ => ""
+            };
+
+            // Umrandung nur für Schiffszellen (2/3)
+            if (v is 2 or 3)
+            {
+                cls += " " + BorderClassForCell(x, y);
+            }
+
+            return cls.Trim();
+        }
+
+        // ---------- Load board + ships ----------
+
+        private async Task LoadBoardAsync()
+        {
+            // 1) Matrix laden
+            Array.Clear(_grid, 0, _grid.Length);
+
+            var rows = await _context.Battlegrounds
+                .Where(b => b.IdMatch == IdMatch && b.FieldHost == Host)
+                .OrderBy(b => b.YCord)
+                .ToListAsync();
+
+            foreach (var r in rows)
+            {
+                int y = r.YCord ?? 0;
+                if (y < 1 || y > 10) continue;
+
+                _grid[1, y] = r.FieldA ?? 0;
+                _grid[2, y] = r.FieldB ?? 0;
+                _grid[3, y] = r.FieldC ?? 0;
+                _grid[4, y] = r.FieldD ?? 0;
+                _grid[5, y] = r.FieldE ?? 0;
+                _grid[6, y] = r.FieldF ?? 0;
+                _grid[7, y] = r.FieldG ?? 0;
+                _grid[8, y] = r.FieldH ?? 0;
+                _grid[9, y] = r.FieldI ?? 0;
+                _grid[10, y] = r.FieldJ ?? 0;
+            }
+
+            // 2) ShipsBattlegrounds + Ship laden (für Boxes) – WICHTIG: pro Placement (= ships_battleground.id)
+            var placements = await _context.ShipsBattlegrounds
+                .Where(s => s.IdMatch == IdMatch && s.ShipHost == Host)
+                .ToListAsync();
+
+            // shipId (Typ) -> boxes
+            var shipTypeIds = placements
+                .Where(p => p.IdShip != null)
+                .Select(p => p.IdShip!.Value)
+                .Distinct()
+                .ToList();
+
+            var shipTypes = await _context.Ships
+                .Where(s => shipTypeIds.Contains(s.Id))
+                .ToDictionaryAsync(s => s.Id, s => s.Boxes);
+
+            _shipCellsByPlacementId = new Dictionary<int, HashSet<(int x, int y)>>();
+
+            foreach (var p in placements)
+            {
+                if (p.Id == 0) continue; // Placement-PK muss existieren
+                if (p.IdShip == null || p.XCord == null || p.YCord == null || p.Across == null) continue;
+                if (!shipTypes.TryGetValue(p.IdShip.Value, out var boxes)) continue;
+
+                if (!_shipCellsByPlacementId.TryGetValue(p.Id, out var set))
+                    _shipCellsByPlacementId[p.Id] = set = new HashSet<(int x, int y)>();
+
+                for (int i = 0; i < boxes; i++)
                 {
-                    OwnMap[i].Add(0);
-                    OpponentMap[i].Add(0);
+                    int x = p.Across.Value ? p.XCord.Value + i : p.XCord.Value;
+                    int y = p.Across.Value ? p.YCord.Value : p.YCord.Value + i;
+
+                    if (x is >= 1 and <= 10 && y is >= 1 and <= 10)
+                        set.Add((x, y));
                 }
             }
         }
 
-        public void OnGet()
+        // ---------- Border logic (PRO shipId) ----------
+
+        private string BorderClassForCell(int x, int y)
         {
-            //Hole match_row 
-            var match_row = _context.Matches
-                .Where(m => (m.IdHost == HttpContext.Session.GetInt32("UserId") || m.IdParticipant == HttpContext.Session.GetInt32("UserId")) && m.Done == false)
-                .FirstOrDefault();
-
-            if (match_row == null)
+            foreach (var kv in _shipCellsByPlacementId)
             {
-                //Kein aktives Match, weiterleiten zur Lobby
-                TempData["Message"] = "Game Over!";
-                Response.Redirect("/Lobby");
+                var cells = kv.Value;
+                if (!cells.Contains((x, y))) continue;
+
+                bool left = cells.Contains((x - 1, y));
+                bool right = cells.Contains((x + 1, y));
+                bool top = cells.Contains((x, y - 1));
+                bool bottom = cells.Contains((x, y + 1));
+
+                var cls = "";
+                if (!top) cls += " bt";
+                if (!right) cls += " br";
+                if (!bottom) cls += " bb";
+                if (!left) cls += " bl";
+                return cls.Trim();
             }
-            else if(match_row.IdParticipant == null)
-            {                 
-                //Gegner ist noch nicht beigetreten
-                TempData["Message"] = "Opponent has not joined yet. Please wait!";
-                //Response.Redirect("/Game");
-            }
-            else if (gameOver(match_row))
-            {
-                //Spiel vorbei, weiterleiten zur Lobby
-                TempData["Message"] = "Game Over!";
-                Response.Redirect("/Lobby");
-            }
-            else
-            { 
-                if (match_row.IdParticipant == HttpContext.Session.GetInt32("UserId"))
-                {
-                    if (match_row.TurnHost == false)
-                    {
-                        myTurn = true;
-                    }
-                    else
-                    {
-                        myTurn = false;
-                    }
-                }
-                else
-                {
-                    if (match_row.TurnHost == true)
-                    {
-                        myTurn = true;
-                    }
-                    else
-                    {
-                        myTurn = false;
-                    }
-                }
-
-
-                    for (int i = 1; i <= 10; i++) {
-
-                    //Hole Battleground row
-                    Battleground bg_row;
-
-                    if (match_row.IdParticipant == HttpContext.Session.GetInt32("UserId"))
-                    {
-                        bg_row = _context.Battlegrounds
-                        .Where(b => b.IdMatch == match_row.Id && b.FieldHost == false && b.YCord == i)
-                        .FirstOrDefault();
-                    }
-                    else
-                    {
-                        bg_row = _context.Battlegrounds
-                        .Where(b => b.IdMatch == match_row.Id && b.FieldHost == true && b.YCord == i)
-                        .FirstOrDefault();
-                    }
-
-                    OwnMap[i - 1][0] = bg_row.FieldA;
-                    OwnMap[i - 1][1] = bg_row.FieldB;
-                    OwnMap[i - 1][2] = bg_row.FieldC;
-                    OwnMap[i - 1][3] = bg_row.FieldD;
-                    OwnMap[i - 1][4] = bg_row.FieldE;
-                    OwnMap[i - 1][5] = bg_row.FieldF;
-                    OwnMap[i - 1][6] = bg_row.FieldG;
-                    OwnMap[i - 1][7] = bg_row.FieldH;
-                    OwnMap[i - 1][8] = bg_row.FieldI;
-                    OwnMap[i - 1][9] = bg_row.FieldJ;
-
-                }
-
-                for (int i = 1; i <= 10; i++)
-                {
-
-                    //Hole Battleground row
-                    Battleground bg_row;
-
-                    if (match_row.IdParticipant == HttpContext.Session.GetInt32("UserId"))
-                    {
-                        bg_row = _context.Battlegrounds
-                        .Where(b => b.IdMatch == match_row.Id && b.FieldHost == true && b.YCord == i)
-                        .FirstOrDefault();
-                    }
-                    else
-                    {
-                        bg_row = _context.Battlegrounds
-                        .Where(b => b.IdMatch == match_row.Id && b.FieldHost == false && b.YCord == i)
-                        .FirstOrDefault();
-                    }
-
-                    OpponentMap[i - 1][0] = bg_row.FieldA;
-                    OpponentMap[i - 1][1] = bg_row.FieldB;
-                    OpponentMap[i - 1][2] = bg_row.FieldC;
-                    OpponentMap[i - 1][3] = bg_row.FieldD;
-                    OpponentMap[i - 1][4] = bg_row.FieldE;
-                    OpponentMap[i - 1][5] = bg_row.FieldF;
-                    OpponentMap[i - 1][6] = bg_row.FieldG;
-                    OpponentMap[i - 1][7] = bg_row.FieldH;
-                    OpponentMap[i - 1][8] = bg_row.FieldI;
-                    OpponentMap[i - 1][9] = bg_row.FieldJ;
-
-                    if (bg_row.FieldA == 2)
-                    {
-                        OpponentMap[i - 1][0] = 0;
-                    }
-                    if (bg_row.FieldB == 2)
-                    {
-                        OpponentMap[i - 1][1] = 0;
-                    }
-                    if (bg_row.FieldC == 2)
-                    {
-                        OpponentMap[i - 1][2] = 0;
-                    }
-                    if (bg_row.FieldD == 2)
-                    {
-                        OpponentMap[i - 1][3] = 0;
-                    }
-                    if (bg_row.FieldE == 2)
-                    {
-                        OpponentMap[i - 1][4] = 0;
-                    }
-                    if (bg_row.FieldF == 2)
-                    {
-                        OpponentMap[i - 1][5] = 0;
-                    }
-                    if (bg_row.FieldG == 2)
-                    {
-                        OpponentMap[i - 1][6] = 0;
-                    }
-                    if (bg_row.FieldH == 2)
-                    {
-                        OpponentMap[i - 1][7] = 0;
-                    }
-                    if (bg_row.FieldI == 2)
-                    {
-                        OpponentMap[i - 1][8] = 0;
-                    }
-                    if (bg_row.FieldJ == 2)
-                    {
-                        OpponentMap[i - 1][9] = 0;
-                    }
-                }
-            }
-
+            return "";
         }
 
-        public async Task<IActionResult> OnPost()
+        // ---------- Battleground field helpers ----------
+
+        private static int GetFieldValue(dynamic row, int x) => x switch
         {
-            if(!string.IsNullOrEmpty(x_cord) || !string.IsNullOrEmpty(y_cord))
-            {
-                
-                //Verarbeite Schuss
-                var match_row = _context.Matches
-                    .Where(m => (m.IdHost == HttpContext.Session.GetInt32("UserId") || m.IdParticipant == HttpContext.Session.GetInt32("UserId")) && m.Done == false)
-                    .FirstOrDefault();
+            1 => row.FieldA,
+            2 => row.FieldB,
+            3 => row.FieldC,
+            4 => row.FieldD,
+            5 => row.FieldE,
+            6 => row.FieldF,
+            7 => row.FieldG,
+            8 => row.FieldH,
+            9 => row.FieldI,
+            10 => row.FieldJ,
+            _ => 0
+        };
 
-                if (match_row != null)
-                {
-                    if (match_row.TurnHost == true)
-                    {
-                        match_row.TurnHost = false;
-                    }
-                    else
-                    {
-                        match_row.TurnHost = true;
-                    }
-
-                }
-
-
-
-                //Hole Battleground row
-                Battleground bg_row;
-
-                if (match_row.IdParticipant == HttpContext.Session.GetInt32("UserId"))
-                {
-                    bg_row = _context.Battlegrounds
-                    .Where(b => b.IdMatch == match_row.Id && b.FieldHost == true && b.YCord == Convert.ToInt32(y_cord)
-                    ).FirstOrDefault();
-                }
-                else
-                {
-                    bg_row = _context.Battlegrounds
-                    .Where(b => b.IdMatch == match_row.Id && b.FieldHost == false && b.YCord == Convert.ToInt32(y_cord)
-                    ).FirstOrDefault();
-                }
-
-                int x = Convert.ToInt32(x_cord);
-
-                switch (x)
-                {
-                    case 1:
-                        if (bg_row.FieldA == 2)
-                        {
-                            bg_row.FieldA = 3; //Treffer
-                        }
-                        else if (bg_row.FieldA == 0)
-                        {
-                            bg_row.FieldA = 1; //Wasser
-                        }
-                        break;
-                    case 2:
-                        if (bg_row.FieldB == 2)
-                        {
-                            bg_row.FieldB = 3;
-                        }
-                        else if (bg_row.FieldB == 0)
-                        {
-                            bg_row.FieldB = 1;
-                        }
-                        break;
-                    case 3:
-                        if (bg_row.FieldC == 2)
-                        {
-                            bg_row.FieldC = 3;
-                        }
-                        else if (bg_row.FieldC == 0)
-                        {
-                            bg_row.FieldC = 1;
-                        }
-                        break;
-                    case 4:
-                        if (bg_row.FieldD == 2)
-                        {
-                            bg_row.FieldD = 3;
-                        }
-                        else if (bg_row.FieldD == 0)
-                        {
-                            bg_row.FieldD = 1;
-                        }
-                        break;
-                    case 5:
-                        if (bg_row.FieldE == 2)
-                        {
-                            bg_row.FieldE = 3;
-                        }
-                        else if (bg_row.FieldE == 0)
-                        {
-                            bg_row.FieldE = 1;
-                        }
-                        break;
-                    case 6:
-                        if (bg_row.FieldF == 2)
-                        {
-                            bg_row.FieldF = 3;
-                        }
-                        else if (bg_row.FieldF == 0)
-                        {
-                            bg_row.FieldF = 1;
-                        }
-                        break;
-                    case 7:
-                        if (bg_row.FieldG == 2)
-                        {
-                            bg_row.FieldG = 3;
-                        }
-                        else if (bg_row.FieldG == 0)
-                        {
-                            bg_row.FieldG = 1;
-                        }
-                        break;
-                    case 8:
-                        if (bg_row.FieldH == 2)
-                        {
-                            bg_row.FieldH = 3;
-                        }
-                        else if (bg_row.FieldH == 0)
-                        {
-                            bg_row.FieldH = 1;
-                        }
-                        break;
-                    case 9:
-                        if (bg_row.FieldI == 2)
-                        {
-                            bg_row.FieldI = 3;
-                        }
-                        else if (bg_row.FieldI == 0)
-                        {
-                            bg_row.FieldI = 1;
-                        }
-                        break;
-                    case 10:
-                        if (bg_row.FieldJ == 2)
-                        {
-                            bg_row.FieldJ = 3;
-                        }
-                        else if (bg_row.FieldJ == 0)
-                        {
-                            bg_row.FieldJ = 1;
-                        }
-                        break;
-                }
-
-
-
-                await _context.SaveChangesAsync();
-
-
-
-            }
-
-            OnGet();
-           return Page();
-        }
-
-        private Boolean gameOver(Battleship.Models.Match match_row)
+        private static void SetFieldValue(dynamic row, int x, int val)
         {
-            int count_hits_participant = 0;
-            int count_hits_host = 0;
-
-            for (int i = 1; i <= 10; i++)
+            switch (x)
             {
-                //Hole Battleground row
-                Battleground bg_row;
-
-                bg_row = _context.Battlegrounds
-                .Where(b => b.IdMatch == match_row.Id && b.FieldHost == false && b.YCord == i)
-                .FirstOrDefault();
-
-                if (bg_row.FieldA == 3) count_hits_participant++;
-                if (bg_row.FieldB == 3) count_hits_participant++;
-                if (bg_row.FieldC == 3) count_hits_participant++;
-                if (bg_row.FieldD == 3) count_hits_participant++;
-                if (bg_row.FieldE == 3) count_hits_participant++;
-                if (bg_row.FieldF == 3) count_hits_participant++;
-                if (bg_row.FieldG == 3) count_hits_participant++;
-                if (bg_row.FieldH == 3) count_hits_participant++;
-                if (bg_row.FieldI == 3) count_hits_participant++;
-                if (bg_row.FieldJ == 3) count_hits_participant++;
+                case 1: row.FieldA = val; break;
+                case 2: row.FieldB = val; break;
+                case 3: row.FieldC = val; break;
+                case 4: row.FieldD = val; break;
+                case 5: row.FieldE = val; break;
+                case 6: row.FieldF = val; break;
+                case 7: row.FieldG = val; break;
+                case 8: row.FieldH = val; break;
+                case 9: row.FieldI = val; break;
+                case 10: row.FieldJ = val; break;
             }
-            for (int i = 1; i <= 10; i++)
-            {
-                //Hole Battleground row
-                Battleground bg_row;
-
-                bg_row = _context.Battlegrounds
-                .Where(b => b.IdMatch == match_row.Id && b.FieldHost == true && b.YCord == i)
-                .FirstOrDefault();
-
-                if (bg_row.FieldA == 3) count_hits_host++;
-                if (bg_row.FieldB == 3) count_hits_host++;
-                if (bg_row.FieldC == 3) count_hits_host++;
-                if (bg_row.FieldD == 3) count_hits_host++;
-                if (bg_row.FieldE == 3) count_hits_host++;
-                if (bg_row.FieldF == 3) count_hits_host++;
-                if (bg_row.FieldG == 3) count_hits_host++;
-                if (bg_row.FieldH == 3) count_hits_host++;
-                if (bg_row.FieldI == 3) count_hits_host++;
-                if (bg_row.FieldJ == 3) count_hits_host++;
-            }
-
-            if (count_hits_participant >= 30 || count_hits_host >= 30)
-            {
-                match_row.Done = true;
-                _context.SaveChanges();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-            
         }
     }
 }

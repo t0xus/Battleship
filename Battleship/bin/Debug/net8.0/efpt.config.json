@@ -23,6 +23,14 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.ship",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.ships_battleground",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.users",
          "ObjectType": 0
       }

@@ -20,38 +20,50 @@ namespace Battleship.Pages
         public Boolean across { get; set; }
         public int boxes { get; set; }
     }
+    public class PlacedShip
+    {
+        public int ShipId { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public bool Across { get; set; }
+        public int? Length { get; set; }
+    }
 
     public class LobbyModel : PageModel
     {
 
         public List<AvailableGames> AvailableGames { get; set; } = new List<AvailableGames>();
-        public List<BattleShips> BattleShipsHost { get; set; } = new List<BattleShips>()
-        {
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 5 }, // Carrier
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 }  // Submarine
-        };
+        //public List<BattleShips> BattleShipsHost { get; set; } = new List<BattleShips>()
+        //{
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 5 }, // Carrier
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 }  // Submarine
+        //};
 
-        public List<BattleShips> BattleShipsParticipant { get; set; } = new List<BattleShips>()
-        {
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 5 }, // Carrier
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
-            new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 }  // Submarine
-        };
+        //public List<BattleShips> BattleShipsParticipant { get; set; } = new List<BattleShips>()
+        //{
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 5 }, // Carrier
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 4 }, // Battleship
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 3 }, // Destroyer
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 },  // Submarine
+        //    new BattleShips() { X = 0, Y = 0, across = true, boxes = 2 }  // Submarine
+        //};
+
+        public List<ShipsBattleground> BattleShipsHost { get; set; } = new List<ShipsBattleground>();
+
+        public List<ShipsBattleground> BattleShipsParticipant { get; set; } = new List<ShipsBattleground>();
 
         private readonly ILogger<LobbyModel> _logger;
 
@@ -152,11 +164,17 @@ namespace Battleship.Pages
                 _context.Matches.Update(match);
                 await _context.SaveChangesAsync();
 
-                BattleShipsHost = createBattleShips(BattleShipsHost);
-                BattleShipsParticipant = createBattleShips(BattleShipsParticipant);
+                //BattleShipsHost = createBattleShips(BattleShipsHost);
+                //BattleShipsParticipant = createBattleShips(BattleShipsParticipant);
                 
-                saveBattleShips(BattleShipsHost, match.Id, true);
-                saveBattleShips(BattleShipsParticipant, match.Id, false);
+                //saveBattleShips(BattleShipsHost, match.Id, true);
+                //saveBattleShips(BattleShipsParticipant, match.Id, false);
+
+                BattleShipsHost = createBattleShips(match.Id, true);
+                BattleShipsParticipant = createBattleShips(match.Id, false);
+
+                saveBattleShips(BattleShipsHost);
+                saveBattleShips(BattleShipsParticipant);
             }
 
             OnGet();
@@ -383,6 +401,232 @@ namespace Battleship.Pages
 
                 _context.SaveChanges();
 
+            }
+        }
+
+        private List<ShipsBattleground> createBattleShips(int id_match, bool ship_host)
+        {
+            const int FIELD_SIZE = 10;
+            var random = new Random();
+
+            // Alle Schiffe aus der Stammdatentabelle laden
+            var shipTypes = _context.Ships.ToList();
+
+            var placedShips = new List<PlacedShip>();
+            var resultShips = new List<Ship>();
+            var resultShips2 = new List<ShipsBattleground>();
+
+            // Belegtes Spielfeld (true = belegt)
+            bool[,] occupied = new bool[FIELD_SIZE + 1, FIELD_SIZE + 1];
+
+            foreach (var ship in shipTypes)
+            {
+                for (int i = 0; i < ship.Quantity; i++)
+                {
+                    bool placed = false;
+
+                    while (!placed)
+                    {
+                        bool across = random.Next(0, 2) == 0;
+                        int x = random.Next(1, FIELD_SIZE + 1);
+                        int y = random.Next(1, FIELD_SIZE + 1);
+
+                        // Prüfen, ob das Schiff ins Feld passt
+                        if (across && x + ship.Boxes > FIELD_SIZE) continue;
+                        if (!across && y + ship.Boxes > FIELD_SIZE) continue;
+
+                        // Prüfen, ob Felder frei sind
+                        bool collision = false;
+                        for (int b = 0; b < ship.Boxes; b++)
+                        {
+                            int cx = across ? x + b : x;
+                            int cy = across ? y : y + b;
+
+                            if (occupied[cx, cy])
+                            {
+                                collision = true;
+                                break;
+                            }
+                        }
+
+                        if (collision) continue;
+
+                        // Platzieren
+                        for (int b = 0; b < ship.Boxes; b++)
+                        {
+                            int cx = across ? x + b : x;
+                            int cy = across ? y : y + b;
+                            occupied[cx, cy] = true;
+                        }
+
+                        // In Battleground-Tabelle speichern
+                        var sb = new ShipsBattleground
+                        {
+                            IdMatch = id_match,
+                            IdShip = ship.Id,
+                            ShipHost = ship_host,
+                            XCord = x,
+                            YCord = y,
+                            Across = across
+                        };
+
+                        resultShips2.Add(sb);
+
+                        //_context.ShipsBattlegrounds.Add(sb);
+
+                        placedShips.Add(new PlacedShip
+                        {
+                            ShipId = ship.Id,
+                            X = x,
+                            Y = y,
+                            Across = across,
+                            Length = ship.Boxes
+                        });
+
+                        resultShips.Add(ship);
+                        placed = true;
+                    }
+                }
+            }
+
+            //_context.SaveChanges();
+            return resultShips2;
+        }
+
+        private void saveBattleShips(List<ShipsBattleground> BattleShips)
+        {
+            _context.ShipsBattlegrounds.AddRange(BattleShips);
+
+            _context.SaveChanges();
+
+            //Initialisiere das Schlachtfeld vor
+            for (int i = 1; i <= 10; i++)
+            {
+                var battleground_raw = new Battleground();
+
+                battleground_raw.IdMatch = BattleShips[0].IdMatch;
+                battleground_raw.FieldHost = BattleShips[0].ShipHost;
+                battleground_raw.YCord = i;
+                battleground_raw.FieldA = 0;
+                battleground_raw.FieldB = 0;
+                battleground_raw.FieldC = 0;
+                battleground_raw.FieldD = 0;
+                battleground_raw.FieldE = 0;
+                battleground_raw.FieldF = 0;
+                battleground_raw.FieldG = 0;
+                battleground_raw.FieldH = 0;
+                battleground_raw.FieldI = 0;
+                battleground_raw.FieldJ = 0;
+
+
+                _context.Battlegrounds.Add(battleground_raw);
+            }
+
+            _context.SaveChanges();
+
+
+
+            foreach (var ship in BattleShips)
+            {
+                int ship_boxes = _context.Ships
+                .Where(s => s.Id == ship.IdShip)
+                .Select(s => s.Boxes ?? 0)
+                .FirstOrDefault();
+
+                if (ship.Across == true)
+                {
+
+                    Battleground battleground_line = _context.Battlegrounds.FirstOrDefault(b => b.IdMatch == ship.IdMatch && b.YCord == ship.YCord && b.FieldHost == ship.ShipHost);
+
+
+
+                    for (int i = 0; i < ship_boxes; i++)
+                    {
+                        switch (ship.XCord + i)
+                        {
+                            case 1:
+                                battleground_line.FieldA = 2;
+                                break;
+                            case 2:
+                                battleground_line.FieldB = 2;
+                                break;
+                            case 3:
+                                battleground_line.FieldC = 2;
+                                break;
+                            case 4:
+                                battleground_line.FieldD = 2;
+                                break;
+                            case 5:
+                                battleground_line.FieldE = 2;
+                                break;
+                            case 6:
+                                battleground_line.FieldF = 2;
+                                break;
+                            case 7:
+                                battleground_line.FieldG = 2;
+                                break;
+                            case 8:
+                                battleground_line.FieldH = 2;
+                                break;
+                            case 9:
+                                battleground_line.FieldI = 2;
+                                break;
+                            case 10:
+                                battleground_line.FieldJ = 2;
+                                break;
+                        }
+                    }
+
+                    _context.Battlegrounds.Update(battleground_line);
+                }
+                else
+                {
+
+                    
+
+                    for (int i = ship.YCord.Value; i < ship.YCord.Value + ship_boxes; i++)
+                    {
+                        Battleground battleground_line = _context.Battlegrounds.FirstOrDefault(b => b.IdMatch == ship.IdMatch && b.YCord == i && b.FieldHost == ship.ShipHost);
+
+                        switch (ship.XCord)
+                        {
+                            case 1:
+                                battleground_line.FieldA = 2;
+                                break;
+                            case 2:
+                                battleground_line.FieldB = 2;
+                                break;
+                            case 3:
+                                battleground_line.FieldC = 2;
+                                break;
+                            case 4:
+                                battleground_line.FieldD = 2;
+                                break;
+                            case 5:
+                                battleground_line.FieldE = 2;
+                                break;
+                            case 6:
+                                battleground_line.FieldF = 2;
+                                break;
+                            case 7:
+                                battleground_line.FieldG = 2;
+                                break;
+                            case 8:
+                                battleground_line.FieldH = 2;
+                                break;
+                            case 9:
+                                battleground_line.FieldI = 2;
+                                break;
+                            case 10:
+                                battleground_line.FieldJ = 2;
+                                break;
+                        }
+
+                        _context.Battlegrounds.Update(battleground_line);
+                    }
+                }
+
+                _context.SaveChanges();
             }
         }
     }

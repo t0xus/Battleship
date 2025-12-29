@@ -1,90 +1,186 @@
 ﻿@page
-@model Battleship.Pages.GameModel
+@model GameModel
+
 @{
-    <h1>Willkommen im Spiel</h1>
-
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success" role="alert">
-            @TempData["Message"]
-        </div>
-    }
-    else
-    {
-        <h2>Eigene Map</h2>
-        <table border="1">
-            <tr>
-                <th>0</th>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-                <th>4</th>
-                <th>5</th>
-                <th>6</th>
-                <th>7</th>
-                <th>8</th>
-                <th>9</th>
-                <th>10</th>
-            </tr>
-            @for (int i = 0; i < 10; i++)
-            {
-                <tr>
-                    <th>@(i + 1)</th>
-                    @for (int j = 0; j < 10; j++)
-                    {
-                        <td>
-                            @Model.OwnMap[i][j]
-                        </td>
-                    }
-                </tr>
-            }
-        </table>
-        <br>
-        <br>
-        <br>
-
-        <h2>Gegnerische Map</h2>
-        <table border="1">
-            <tr>
-                <th>0</th>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-                <th>4</th>
-                <th>5</th>
-                <th>6</th>
-                <th>7</th>
-                <th>8</th>
-                <th>9</th>
-                <th>10</th>
-            </tr>
-            @for (int i = 0; i < 10; i++)
-            {
-                <tr>
-                    <th>@(i + 1)</th>
-                    @for (int j = 0; j < 10; j++)
-                    {
-                        <td>
-                            @if (Model.myTurn)
-                            {
-                                <form method="post">
-                                    <input type="hidden" asp-for="y_cord" value="@(i + 1)" />
-                                    <input type="hidden" asp-for="x_cord" value="@(j + 1)" />
-                                    <input type="submit" value="@Model.OpponentMap[i][j]" />
-                                </form>
-                            }
-                            else
-                            {
-                                @Model.OpponentMap[i][j]
-                            }
-
-
-                        </td>
-                    }
-                </tr>
-            }
-        </table>
-
-    }
-    
+    ViewData["Title"] = "Battleship Game";
 }
+
+<style>
+    .board-wrap {
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
+    }
+
+    .board-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .board-subtitle {
+        color: #666;
+        margin-bottom: 16px;
+    }
+
+    table.board {
+        border-collapse: separate;
+        border-spacing: 3px;
+    }
+
+        table.board th, table.board td {
+            text-align: center;
+        }
+
+    th.hdr {
+        width: 28px;
+        height: 28px;
+        font-weight: 700;
+        color: #333;
+    }
+
+    td.yhdr {
+        width: 28px;
+        height: 28px;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .cell {
+        width: 28px;
+        height: 28px;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        box-sizing: border-box;
+        position: relative;
+        padding: 0;
+    }
+
+    /* Battleground-Zustände */
+    .miss {
+        background: #fff;
+    }
+
+    .hitbad {
+        background: #fff;
+    }
+
+        .hitbad::after {
+            content: "×";
+            color: #111;
+            font-size: 26px;
+            line-height: 28px;
+            font-weight: 700;
+        }
+
+    .ship {
+        background: #cfcfcf;
+    }
+
+    .shiphit {
+        background: #bdbdbd;
+    }
+
+        .shiphit::after {
+            content: "×";
+            color: #111;
+            font-size: 26px;
+            line-height: 28px;
+            font-weight: 700;
+        }
+
+    /* Umrandung (pro Schiff) */
+    .bt {
+        border-top: 3px solid #222 !important;
+    }
+
+    .br {
+        border-right: 3px solid #222 !important;
+    }
+
+    .bb {
+        border-bottom: 3px solid #222 !important;
+    }
+
+    .bl {
+        border-left: 3px solid #222 !important;
+    }
+
+    /* Klickbarer Schuss-Button */
+    .shotbtn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        cursor: pointer;
+        display: block;
+    }
+
+    .legend {
+        margin-top: 18px;
+        font-size: 14px;
+        color: #333;
+    }
+
+        .legend code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+</style>
+
+<div class="board-title">Battlefield (Match @Model.IdMatch, Host=@Model.Host)</div>
+<div class="board-subtitle">Klick auf ein Feld für einen Test-Schuss (0→1, 2→3).</div>
+
+<div class="board-wrap">
+    <form method="post">
+        <input type="hidden" asp-for="IdMatch" />
+        <input type="hidden" asp-for="Host" />
+
+        <table class="board" aria-label="Battleship board">
+            <thead>
+                <tr>
+                    <th class="hdr"></th>
+                    @foreach (var col in Model.Columns)
+                    {
+                        <th class="hdr">@col</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int y = 1; y <= 10; y++)
+                {
+                    <tr>
+                        <td class="yhdr">@y</td>
+                        @for (int x = 1; x <= 10; x++)
+                        {
+                            var cell = Model.GetCell(x, y);
+                            var css = Model.GetCellCss(x, y);
+
+                            <td class="cell @css" title="(@x,@y) val=@cell">
+                                <!-- Optional: Schuss-POST -->
+                                <button class="shotbtn"
+                                        type="submit"
+                                        formaction="?handler=Shoot"
+                                        name="shot"
+                                        value="@($"{x},{y}")"
+                                        aria-label="Shoot @x @y">
+                                </button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </form>
+
+    <div class="legend">
+        <div><b>Legende</b></div>
+        <div><code>0</code> leer</div>
+        <div><code>1</code> Fehlschuss (×)</div>
+        <div><code>2</code> Schiffsteil</div>
+        <div><code>3</code> Treffer (×)</div>
+    </div>
+</div>

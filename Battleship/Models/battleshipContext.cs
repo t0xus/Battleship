@@ -17,6 +17,10 @@ public partial class battleshipContext : DbContext
 
     public virtual DbSet<Match> Matches { get; set; }
 
+    public virtual DbSet<Ship> Ships { get; set; }
+
+    public virtual DbSet<ShipsBattleground> ShipsBattlegrounds { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,6 +61,35 @@ public partial class battleshipContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("match_name");
             entity.Property(e => e.TurnHost).HasColumnName("turn_host");
+        });
+
+        modelBuilder.Entity<Ship>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("ship_pkey");
+
+            entity.ToTable("ship");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Boxes).HasColumnName("boxes");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+        });
+
+        modelBuilder.Entity<ShipsBattleground>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("ships_battleground_pkey");
+
+            entity.ToTable("ships_battleground");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Across).HasColumnName("across");
+            entity.Property(e => e.IdMatch).HasColumnName("id_match");
+            entity.Property(e => e.IdShip).HasColumnName("id_ship");
+            entity.Property(e => e.ShipHost).HasColumnName("ship_host");
+            entity.Property(e => e.XCord).HasColumnName("x_cord");
+            entity.Property(e => e.YCord).HasColumnName("y_cord");
         });
 
         modelBuilder.Entity<User>(entity =>
