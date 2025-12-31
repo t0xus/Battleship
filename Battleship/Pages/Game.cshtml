@@ -1,186 +1,293 @@
 ﻿@page
-@model GameModel
-
+@model Battleship.Pages.GameModel
 @{
-    ViewData["Title"] = "Battleship Game";
+    ViewData["Title"] = "Game";
 }
 
 <style>
-    .board-wrap {
+    .wrap {
+        max-width: 1100px;
+        margin: 20px auto;
+        font-family: Arial, sans-serif;
+    }
+
+    h1 {
+        margin-bottom: 6px;
+    }
+
+    .meta {
+        color: #444;
+        margin-bottom: 14px;
+    }
+
+    .notice {
+        padding: 10px;
+        background: #fff3cd;
+        border: 1px solid #ffeeba;
+        margin: 10px 0;
+        border-radius: 6px;
+    }
+
+    .error {
+        padding: 10px;
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        margin: 10px 0;
+        border-radius: 6px;
+    }
+
+    .boards {
         display: flex;
-        gap: 32px;
+        gap: 30px;
         align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .board {
     }
 
     .board-title {
-        font-size: 26px;
-        font-weight: 700;
-        margin-bottom: 12px;
+        font-weight: bold;
+        margin: 8px 0 2px;
     }
 
-    .board-subtitle {
-        color: #666;
-        margin-bottom: 16px;
+    .subinfo {
+        color: #555;
+        margin-bottom: 10px;
+        font-size: 13px;
     }
 
-    table.board {
-        border-collapse: separate;
-        border-spacing: 3px;
+    .grid {
+        display: grid;
+        grid-template-columns: 28px repeat(10, 28px);
+        grid-auto-rows: 28px;
+        gap: 4px;
+        user-select: none;
     }
 
-        table.board th, table.board td {
-            text-align: center;
-        }
-
-    th.hdr {
-        width: 28px;
-        height: 28px;
-        font-weight: 700;
-        color: #333;
+    .hcell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #111;
     }
 
-    td.yhdr {
-        width: 28px;
-        height: 28px;
-        font-weight: 700;
-        color: #333;
+    .cellform {
+        margin: 0;
     }
 
     .cell {
         width: 28px;
         height: 28px;
-        border: 1px solid #d9d9d9;
         background: #fff;
-        box-sizing: border-box;
+        border: 1px solid #d0d0d0;
+        border-radius: 3px;
         position: relative;
         padding: 0;
-    }
-
-    /* Battleground-Zustände */
-    .miss {
-        background: #fff;
-    }
-
-    .hitbad {
-        background: #fff;
-    }
-
-        .hitbad::after {
-            content: "×";
-            color: #111;
-            font-size: 26px;
-            line-height: 28px;
-            font-weight: 700;
-        }
-
-    .ship {
-        background: #cfcfcf;
-    }
-
-    .shiphit {
-        background: #bdbdbd;
-    }
-
-        .shiphit::after {
-            content: "×";
-            color: #111;
-            font-size: 26px;
-            line-height: 28px;
-            font-weight: 700;
-        }
-
-    /* Umrandung (pro Schiff) */
-    .bt {
-        border-top: 3px solid #222 !important;
-    }
-
-    .br {
-        border-right: 3px solid #222 !important;
-    }
-
-    .bb {
-        border-bottom: 3px solid #222 !important;
-    }
-
-    .bl {
-        border-left: 3px solid #222 !important;
-    }
-
-    /* Klickbarer Schuss-Button */
-    .shotbtn {
-        width: 28px;
-        height: 28px;
-        border: none;
-        padding: 0;
-        margin: 0;
-        background: transparent;
         cursor: pointer;
-        display: block;
     }
+
+        .cell.disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        /* values */
+        .cell.ship {
+            background: #cfcfcf;
+        }
+        /* Schiff sichtbar */
+        .cell.miss::after {
+            content: "×";
+            color: #c2185b;
+            font-weight: bold;
+            position: absolute;
+            left: 9px;
+            top: 3px;
+        }
+
+        .cell.hit::after {
+            content: "×";
+            color: #000;
+            font-weight: bold;
+            position: absolute;
+            left: 9px;
+            top: 3px;
+        }
+
+        /* borders */
+        .cell.bL {
+            border-left: 3px solid #222;
+        }
+
+        .cell.bR {
+            border-right: 3px solid #222;
+        }
+
+        .cell.bT {
+            border-top: 3px solid #222;
+        }
+
+        .cell.bB {
+            border-bottom: 3px solid #222;
+        }
 
     .legend {
-        margin-top: 18px;
-        font-size: 14px;
+        font-size: 13px;
+        margin-top: 10px;
         color: #333;
     }
 
-        .legend code {
-            background: #f5f5f5;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .legend div {
+            margin: 3px 0;
+        }
+
+    .turn {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid #ccc;
+        background: #f7f7f7;
+        margin-left: 6px;
+    }
+
+        .turn.me {
+            background: #e8f5e9;
+            border-color: #a5d6a7;
+        }
+
+        .turn.notme {
+            background: #ffebee;
+            border-color: #ef9a9a;
         }
 </style>
 
-<div class="board-title">Battlefield (Match @Model.IdMatch, Host=@Model.Host)</div>
-<div class="board-subtitle">Klick auf ein Feld für einen Test-Schuss (0→1, 2→3).</div>
 
-<div class="board-wrap">
-    <form method="post">
-        <input type="hidden" asp-for="IdMatch" />
-        <input type="hidden" asp-for="Host" />
+@if(Model.WaitForparticipant())
+{
+    <div class="notice">Warte auf Teilnehmer zum Beitreten...</div>
+}
 
-        <table class="board" aria-label="Battleship board">
-            <thead>
-                <tr>
-                    <th class="hdr"></th>
-                    @foreach (var col in Model.Columns)
-                    {
-                        <th class="hdr">@col</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
+else{
+<div class="wrap">
+    <h1>Battleship</h1>
+    <div class="meta">
+        Match: @Model.MatchId |
+        Rolle: @(Model.IsHost ? "Host" : "Participant") |
+        Zug:
+        @if (Model.IsMyTurn)
+        {
+            <span class="turn me">Du bist dran</span>
+        }
+        else
+        {
+            <span class="turn notme">Gegner ist dran</span>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="error">@Model.ErrorMessage</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
+    {
+        <div class="notice">@Model.InfoMessage</div>
+    }
+
+    <div class="boards">
+        <!-- Eigenes Feld -->
+        <section class="board">
+            <div class="board-title">Dein Spielfeld</div>
+            <div class="subinfo">Schiffe (2), Fehlschuss (1), Treffer (3)</div>
+
+            <div class="grid">
+                <!-- Ecke -->
+                <div class="hcell"></div>
+
+                <!-- Header A..J -->
+                @for (int x = 1; x <= 10; x++)
+                {
+                    <div class="hcell">@Battleship.Pages.GameModel.XLetters[x - 1]</div>
+                }
+
+                <!-- Rows -->
                 @for (int y = 1; y <= 10; y++)
                 {
-                    <tr>
-                        <td class="yhdr">@y</td>
-                        @for (int x = 1; x <= 10; x++)
-                        {
-                            var cell = Model.GetCell(x, y);
-                            var css = Model.GetCellCss(x, y);
+                    <div class="hcell">@y</div>
 
-                            <td class="cell @css" title="(@x,@y) val=@cell">
-                                <!-- Optional: Schuss-POST -->
-                                <button class="shotbtn"
-                                        type="submit"
-                                        formaction="?handler=Shoot"
-                                        name="shot"
-                                        value="@($"{x},{y}")"
-                                        aria-label="Shoot @x @y">
-                                </button>
-                            </td>
-                        }
-                    </tr>
+                    @for (int x = 1; x <= 10; x++)
+                    {
+                        var cls = Model.OwnCellCss(x, y);
+                        <div class="@cls"></div>
+                    }
                 }
-            </tbody>
-        </table>
-    </form>
+            </div>
 
-    <div class="legend">
-        <div><b>Legende</b></div>
-        <div><code>0</code> leer</div>
-        <div><code>1</code> Fehlschuss (×)</div>
-        <div><code>2</code> Schiffsteil</div>
-        <div><code>3</code> Treffer (×)</div>
+            <div class="legend">
+                <div><b>Legende:</b></div>
+                <div>0 = leer</div>
+                <div>1 = Fehlschuss (×)</div>
+                <div>2 = Schiffsteil</div>
+                <div>3 = Treffer (×)</div>
+            </div>
+        </section>
+
+        <!-- Gegnerisches Feld -->
+        <section class="board">
+            <div class="board-title">Gegnerisches Spielfeld</div>
+            <div class="subinfo">
+                Schieße per Klick. Treffer/Fehlschuss werden angezeigt. Schiffe + Rand nur wenn versenkt.
+            </div>
+
+            <div class="grid">
+                <!-- Ecke -->
+                <div class="hcell"></div>
+
+                <!-- Header A..J -->
+                @for (int x = 1; x <= 10; x++)
+                {
+                    <div class="hcell">@Battleship.Pages.GameModel.XLetters[x - 1]</div>
+                }
+
+                <!-- Rows -->
+                @for (int y = 1; y <= 10; y++)
+                {
+                    <div class="hcell">@y</div>
+
+                    @for (int x = 1; x <= 10; x++)
+                    {
+                        var disabled = Model.EnemyCellDisabled(x, y);
+                        var cls = Model.EnemyCellCss(x, y) + (disabled ? " disabled" : "");
+
+                        <form class="cellform" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="X" value="@x" />
+                            <input type="hidden" name="Y" value="@y" />
+                            <button type="submit" class="@cls" @(disabled ? "disabled" : "")></button>
+                        </form>
+                    }
+                }
+            </div>
+        </section>
     </div>
 </div>
+}
+
+
+<script>
+    (function () {
+        const isMyTurn = @(Model.IsMyTurn || Model.WaitForparticipant() ? "true" : "false");
+        const waitFor = @(Model.WaitForparticipant() ? "true" : "false");
+
+        // Nur automatisch aktualisieren, wenn der Gegner dran ist
+        if (!isMyTurn || waitFor) {
+            setInterval(() => {
+                // expliziter GET-Aufruf statt reload()
+                window.location.href = window.location.pathname;
+            }, 2000);
+        }
+
+    })();
+</script>
